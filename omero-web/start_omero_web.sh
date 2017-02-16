@@ -1,9 +1,7 @@
 function wait_for_db_user {
-    output=`psql -U postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='omero'"`
-    while [ $output != 1 ]; do
-        echo Waiting for omero user to be created in the database
-        sleep 5s
-        output=`psql -U postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='omero'"`
+    until ${OMERO_HOME}/bin/omero login -s omero_server -p 4064 -u root -w password ; do
+        >&2 echo "OMERO.server is unavailable - sleeping"
+        sleep 10
     done
 }
 
