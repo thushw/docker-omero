@@ -1,3 +1,12 @@
+function wait_for_db_user {
+    output=`psql -U postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='omero'"`
+    while [ $output != 1 ]; do
+        echo Waiting for omero user to be created in the database
+        sleep 5s
+        output=`psql -U postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='omero'"`
+    done
+}
+
 cd $OMERO_HOME
 
 if [ $OMERO_WEB_DEVELOPMENT == "no" ]
@@ -21,6 +30,8 @@ then
     export PYTHONPATH=$OMERO_WEB_DEVELOPMENT_APPS:$PYTHONPATH
     bash /data/omero_web_apps/deploy.sh
 
+    wait_for_db_user
+
     ./bin/omero web start
 
 else
@@ -35,5 +46,6 @@ else
 
     ./bin/omero config set omero.web.server_list "[[\"omero_server\", 4064, \"omero\"]]"
 
+    wait_for_db_user
 fi
 
